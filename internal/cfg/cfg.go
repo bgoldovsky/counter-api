@@ -33,7 +33,7 @@ func GetPort() string {
 func GetStore() string {
 	store := os.Getenv("STORE_PATH")
 	if store == "" {
-		store = "./bin/store.gob"
+		store = "./store.gob"
 	}
 
 	return store
