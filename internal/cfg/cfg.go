@@ -1,0 +1,40 @@
+package config
+
+import (
+	"log"
+	"os"
+	"strconv"
+)
+
+// GetExpires returns counter expiration in seconds
+func GetExpires() int {
+
+	tmp := os.Getenv("EXPIRES")
+	exp, err := strconv.ParseInt(tmp, 10, 0)
+	if err != nil {
+		log.Println("can't parse value", tmp, err.Error())
+		exp = 60
+	}
+
+	return int(exp)
+}
+
+// GetPort returns HTTP port
+func GetPort() string {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8082"
+	}
+
+	return port
+}
+
+// GetStore returns storage file path
+func GetStore() string {
+	store := os.Getenv("STORE_PATH")
+	if store == "" {
+		store = "./bin/store.gob"
+	}
+
+	return store
+}
