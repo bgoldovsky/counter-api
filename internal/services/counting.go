@@ -10,10 +10,7 @@ import (
 )
 
 var counter models.Requests
-
 var store string
-var expires int
-
 var location *time.Location
 var mutex sync.Mutex
 
@@ -33,11 +30,14 @@ func LoadState(path string, exp int) {
 	}
 
 	store = path
-	expires = exp
 
 	val, err := dal.Get(store)
 	if err != nil {
-		counter = models.Requests{Map: make(map[time.Time]bool)}
+		counter = models.Requests{
+			Map:        make(map[time.Time]bool),
+			Expires:    exp,
+			LastUpdate: time.Now().In(location),
+		}
 		log.Println("init counter state")
 
 		return
@@ -54,14 +54,12 @@ func GetState() (models.State, error) {
 	mutex.Lock()
 
 	now := time.Now().In(location)
-	counter.Inc(now, expires)
+	state := counter.Inc(now)
 
 	err := dal.Store(&counter, store)
 	if err != nil {
 		log.Println("can't write to strore", err)
 	}
-
-	state := models.State{Total: counter.Count(), LastUpdate: now}
 
 	mutex.Unlock()
 
