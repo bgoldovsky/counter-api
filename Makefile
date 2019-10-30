@@ -8,7 +8,7 @@ build:
 
 test:
 	echo "Testing.."
-	go test -count=1 -p=1 -v ./...
+	go test -count=1 -p=1 -v -cover ./...
 
 compile:
 	echo "Compiling for Mac OS.."
