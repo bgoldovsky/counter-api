@@ -17,7 +17,7 @@ type counterHandler struct {
 func StartServer(port string, filepath string, expires int) {
 	log.Printf("Service starting on port %s\n", port)
 
-	srv.LoadState(filepath, expires)
+	srv.Init(filepath, expires)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), counterHandler{}))
 }
 

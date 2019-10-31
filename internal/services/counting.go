@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"log"
 	"sync"
 	"time"
@@ -23,10 +24,10 @@ func init() {
 	location = loc
 }
 
-// LoadState load current state from storage
-func LoadState(path string, exp int) {
+// Init load current state from storage
+func Init(path string, exp int) error {
 	if path == "" {
-		panic("store path not specified")
+		return errors.New("store path not specified")
 	}
 
 	store = path
@@ -38,13 +39,17 @@ func LoadState(path string, exp int) {
 			Expires:    exp,
 			LastUpdate: time.Now().In(location),
 		}
+
 		log.Println("init counter state")
 
-		return
+		return nil
 	}
 
 	counter = *val
+
 	log.Printf("restore counter state: %v\n", counter)
+
+	return nil
 }
 
 // GetState retrieve counter state

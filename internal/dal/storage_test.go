@@ -14,7 +14,7 @@ func TestStorage_Success(t *testing.T) {
 
 	loc, err := time.LoadLocation("UTC")
 	if err != nil {
-		panic(err)
+		t.Error("can't load location")
 	}
 
 	defer clear(filepath)

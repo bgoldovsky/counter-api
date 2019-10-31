@@ -25,12 +25,12 @@ func Store(r *models.Requests, filename string) (err error) {
 
 	err = enc.Encode(r)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	err = ioutil.WriteFile(filename, buf.Bytes(), 0600)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return
@@ -52,7 +52,7 @@ func Get(filename string) (r *models.Requests, err error) {
 
 	err = dec.Decode(&r)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return

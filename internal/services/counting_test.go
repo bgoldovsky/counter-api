@@ -12,7 +12,7 @@ func TestCounting_Success(t *testing.T) {
 	const store = "./testfile.gob"
 	const expiresSec = 60
 
-	LoadState(store, expiresSec)
+	Init(store, expiresSec)
 	defer clear(store)
 
 	state, err := GetState()
@@ -29,7 +29,7 @@ func TestCounting_Concurrency_Success(t *testing.T) {
 	const store = "./testfile.gob"
 	const expiresSec = 60
 
-	LoadState(store, expiresSec)
+	Init(store, expiresSec)
 	defer clear(store)
 
 	runConcurrency()
@@ -44,7 +44,7 @@ func TestCounting_Expired_Success(t *testing.T) {
 	const store = "./testfile.gob"
 	const expiresSec = 3
 
-	LoadState(store, expiresSec)
+	Init(store, expiresSec)
 	defer clear(store)
 
 	runConcurrency()
@@ -60,7 +60,7 @@ func TestCounting_Expired_Fail(t *testing.T) {
 	const store = "./testfile.gob"
 	const expiresSec = 10
 
-	LoadState(store, expiresSec)
+	Init(store, expiresSec)
 	defer clear(store)
 
 	runConcurrency()
