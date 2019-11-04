@@ -1,8 +1,10 @@
-package models
+package models_test
 
 import (
 	"testing"
 	"time"
+
+	. "github.com/bgoldovsky/counter-api/internal/models"
 )
 
 func TestInc_Success(t *testing.T) {

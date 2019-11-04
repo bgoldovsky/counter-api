@@ -1,4 +1,4 @@
-package dal
+package dal_test
 
 import (
 	"os"
@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/bgoldovsky/counter-api/internal/models"
+
+	. "github.com/bgoldovsky/counter-api/internal/dal"
 )
 
 func TestStorage_Success(t *testing.T) {

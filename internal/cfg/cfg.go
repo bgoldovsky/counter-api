@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"os"
 	"strconv"
 )
@@ -12,7 +11,6 @@ func GetExpires() int {
 	tmp := os.Getenv("EXPIRES")
 	exp, err := strconv.ParseInt(tmp, 10, 0)
 	if err != nil {
-		log.Println("can't parse value", tmp, err.Error())
 		exp = 60
 	}
 

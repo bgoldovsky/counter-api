@@ -1,11 +1,12 @@
-package services
+package services_test
 
 import (
 	"os"
 	"sync"
+	"testing"
 	"time"
 
-	"testing"
+	. "github.com/bgoldovsky/counter-api/internal/services"
 )
 
 func TestCounting_Success(t *testing.T) {
