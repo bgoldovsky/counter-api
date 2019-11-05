@@ -9,32 +9,40 @@ import (
 	srv "github.com/bgoldovsky/counter-api/internal/services"
 )
 
+var counter srv.Counter
+
 type counterHandler struct {
 	http.Handler
 }
 
 // StartServer func starts listening single endpoint of service
 func StartServer(port string, filepath string, expires int) {
-	log.Printf("Service starting on port %s\n", port)
+	log.Printf("service starting on port %s\n", port)
 
-	srv.Init(filepath, expires)
+	c, err := srv.NewCounter(filepath, expires)
+	if err != nil {
+		log.Fatal("can't create counter")
+		return
+	}
+
+	counter = c
+
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), counterHandler{}))
 }
 
 // ServeHTTP handler
 func (h counterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-
 		log.Println(r.Method, r.URL.Path)
 
-		state, err := srv.GetState()
-
+		err := counter.Increment()
 		if err != nil {
 			writeError(w, err)
 
 			return
 		}
 
+		state := counter.GetState()
 		val, err := json.Marshal(state)
 		if err != nil {
 			writeError(w, err)

@@ -11,7 +11,7 @@ import (
 	. "github.com/bgoldovsky/counter-api/internal/dal"
 )
 
-func TestStorage_Success(t *testing.T) {
+func TestStorageSuccess(t *testing.T) {
 	const filepath = "./testfile.gob"
 
 	loc, err := time.LoadLocation("UTC")
@@ -43,7 +43,7 @@ func TestStorage_Success(t *testing.T) {
 	}
 }
 
-func TestStorage_WrongTime(t *testing.T) {
+func TestStorageWrongTime(t *testing.T) {
 	const filepath = "./testfile.gob"
 	defer clear(filepath)
 
@@ -60,7 +60,7 @@ func TestStorage_WrongTime(t *testing.T) {
 	}
 }
 
-func TestStorage_NoPath(t *testing.T) {
+func TestStorageNoPath(t *testing.T) {
 	const filepath = ""
 
 	exp := models.Requests{Map: map[time.Time]bool{
@@ -73,7 +73,7 @@ func TestStorage_NoPath(t *testing.T) {
 	}
 }
 
-func TestStorage_NoObj(t *testing.T) {
+func TestStorageNoObj(t *testing.T) {
 	const filepath = "./testfile.gob"
 
 	err := Store(nil, filepath)

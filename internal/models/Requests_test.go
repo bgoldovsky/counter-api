@@ -7,7 +7,9 @@ import (
 	. "github.com/bgoldovsky/counter-api/internal/models"
 )
 
-func TestInc_Success(t *testing.T) {
+func TestIncSuccess(t *testing.T) {
+	t.Parallel()
+
 	r := Requests{}
 	r.Map = make(map[time.Time]bool)
 	r.Expires = 5
@@ -15,36 +17,45 @@ func TestInc_Success(t *testing.T) {
 	const expected = 10
 
 	for i := 1; i < 10; i++ {
-		r.Inc(time.Now())
+		r.Increment(time.Now())
 	}
 
-	act := r.Inc(time.Now())
+	now := time.Now()
+
+	r.Increment(now)
+	act := r.State(now)
 
 	if act.Total != expected {
 		t.Errorf("counter not equals expected.\nact: %v\nexp %v\n", act.Total, expected)
 	}
 }
 
-func TestInc_Expires(t *testing.T) {
+func TestIncExpired(t *testing.T) {
+	t.Parallel()
+
 	const expected = 1
 	const expires = 1
 
 	r := Requests{Expires: expires, Map: make(map[time.Time]bool)}
 
 	for i := 0; i < 10; i++ {
-		r.Inc(time.Now())
+		r.Increment(time.Now())
 	}
 
 	time.Sleep(time.Second * expires)
+	now := time.Now()
 
-	act := r.Inc(time.Now())
+	r.Increment(now)
+	act := r.State(now)
 
 	if act.Total != expected {
 		t.Errorf("counter not equals expected.\nact: %v\nexp: %v\n", act.Total, expected)
 	}
 }
 
-func TestState_Success(t *testing.T) {
+func TestStateSuccess(t *testing.T) {
+	t.Parallel()
+
 	r := Requests{}
 	r.Map = make(map[time.Time]bool)
 	r.Expires = 5
@@ -52,29 +63,34 @@ func TestState_Success(t *testing.T) {
 	const expected = 10
 
 	for i := 0; i < 10; i++ {
-		r.Inc(time.Now())
+		r.Increment(time.Now())
 	}
 
-	act := r.State(time.Now())
+	now := time.Now()
+
+	act := r.State(now)
 
 	if act.Total != expected {
 		t.Errorf("counter not equals expected.\nact: %v\nexp %v\n", act.Total, expected)
 	}
 }
 
-func TestState_Expires(t *testing.T) {
+func TestStateExpired(t *testing.T) {
+	t.Parallel()
+
 	const expected = 0
 	const expires = 1
 
 	r := Requests{Expires: expires, Map: make(map[time.Time]bool)}
 
 	for i := 0; i < 10; i++ {
-		r.Inc(time.Now())
+		r.Increment(time.Now())
 	}
 
 	time.Sleep(time.Second * expires)
+	now := time.Now()
 
-	act := r.State(time.Now())
+	act := r.State(now)
 
 	if act.Total != expected {
 		t.Errorf("counter not equals expected.\nact: %v\nexp: %v\n", act.Total, expected)

@@ -9,78 +9,94 @@ import (
 	. "github.com/bgoldovsky/counter-api/internal/services"
 )
 
-func TestCounting_Success(t *testing.T) {
+func TestCountingSuccess(t *testing.T) {
 	const store = "./testfile.gob"
 	const expiresSec = 60
 
-	Init(store, expiresSec)
+	srv, err := NewCounter(store, expiresSec)
+	if err != nil {
+		t.Fatal("can't create service")
+	}
+
 	defer clear(store)
 
-	state, err := GetState()
-	if err != nil {
-		t.Error("can't get state: " + err.Error())
-	}
+	srv.Increment()
+	state := srv.GetState()
 
 	if state.Total != 1 {
 		t.Errorf("invalid state: %d\n", state.Total)
 	}
 }
 
-func TestCounting_Concurrency_Success(t *testing.T) {
+func TestCountingConcurrencySuccess(t *testing.T) {
+
 	const store = "./testfile.gob"
 	const expiresSec = 60
 
-	Init(store, expiresSec)
+	srv, err := NewCounter(store, expiresSec)
+	if err != nil {
+		t.Fatal("can't create service")
+	}
+
 	defer clear(store)
 
-	runConcurrency()
+	runConcurrency(srv)
 
-	s, _ := GetState()
+	s := srv.GetState()
+
 	if s.Total != 1000 {
 		t.Errorf("invalid state: %d\n", s.Total)
 	}
 }
 
-func TestCounting_Expired_Success(t *testing.T) {
+func TestCountingExpiredSuccess(t *testing.T) {
 	const store = "./testfile.gob"
 	const expiresSec = 3
 
-	Init(store, expiresSec)
+	srv, err := NewCounter(store, expiresSec)
+	if err != nil {
+		t.Fatal("can't create service")
+	}
 	defer clear(store)
 
-	runConcurrency()
+	runConcurrency(srv)
 	time.Sleep(time.Second * expiresSec)
 
-	s, _ := GetState()
+	srv.Increment()
+
+	s := srv.GetState()
 	if s.Total != 1 {
 		t.Errorf("invalid state: %d\n", s.Total)
 	}
 }
 
-func TestCounting_Expired_Fail(t *testing.T) {
+func TestCountingExpiredFail(t *testing.T) {
 	const store = "./testfile.gob"
 	const expiresSec = 10
 
-	Init(store, expiresSec)
+	srv, err := NewCounter(store, expiresSec)
+	if err != nil {
+		t.Fatal("can't create service")
+	}
 	defer clear(store)
 
-	runConcurrency()
+	runConcurrency(srv)
 	time.Sleep(time.Second)
 
-	s, _ := GetState()
+	s := srv.GetState()
 	if s.Total == 1 {
 		t.Errorf("invalid state: %d\n", s.Total)
 	}
 }
 
-func runConcurrency() {
+func runConcurrency(c Counter) {
 	var wg sync.WaitGroup
-	wg.Add(999)
+	wg.Add(1000)
 
-	for i := 0; i < 999; i++ {
+	for i := 0; i < 1000; i++ {
 		go func() {
 			defer wg.Done()
-			GetState()
+			c.Increment()
 		}()
 	}
 

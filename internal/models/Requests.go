@@ -2,24 +2,22 @@ package models
 
 import "time"
 
-// Requests is a map of request times
+// Requests is a map and meta of request times
 type Requests struct {
 	Map        map[time.Time]bool
 	Expires    int
 	LastUpdate time.Time
 }
 
-// Inc increment state of counter and returns state
-func (r *Requests) Inc(now time.Time) State {
+// Increment request counter
+func (r *Requests) Increment(now time.Time) {
 	r.Map[now] = true
 	r.LastUpdate = now
 
 	r.recalc(now)
-
-	return State{Total: len(r.Map), LastUpdate: r.LastUpdate}
 }
 
-// State returns state without increment
+// State returns request counter
 func (r *Requests) State(now time.Time) State {
 	r.recalc(now)
 
