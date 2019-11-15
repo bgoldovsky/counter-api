@@ -22,7 +22,6 @@ type CounterService struct {
 
 // NewCounter CounterService constructor
 func NewCounter(filepath string, expires int) (Counter, error) {
-
 	if filepath == "" {
 		err := errors.New("store path not specified")
 		return nil, err
