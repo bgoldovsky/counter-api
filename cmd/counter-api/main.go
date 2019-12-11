@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	api "github.com/bgoldovsky/counter-api/api"
+	api "github.com/bgoldovsky/counter-api/internal/api"
 	cfg "github.com/bgoldovsky/counter-api/internal/cfg"
 )
 

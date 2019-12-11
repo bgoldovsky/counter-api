@@ -1,6 +1,6 @@
-application: counter_api
+application: counter-api
 version: 1
-runtime: go112
+runtime: go113
 api_version: go1
 
 handlers:
