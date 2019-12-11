@@ -1,0 +1,1 @@
+web: restart=fail waitfor=localhost:8085 bin/counter-api
