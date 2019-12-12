@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	services "github.com/bgoldovsky/counter-api/internal/services"
+	"github.com/bgoldovsky/counter-api/internal/services"
 )
 
 // CounterServer to handle HTTP requests

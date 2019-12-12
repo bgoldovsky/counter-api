@@ -2,9 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/bgoldovsky/counter-api/internal/api"
 	"github.com/bgoldovsky/counter-api/internal/cfg"
@@ -18,9 +15,6 @@ func main() {
 	expires := cfg.GetExpires()
 
 	log.Printf("init config..\nport: %v\nstore: %v\nexpires: %v\n", port, path, expires)
-
-	done := make(chan os.Signal, 1)
-	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	repo, err := dal.New(path)
 	if err != nil {

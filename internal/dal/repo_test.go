@@ -112,7 +112,7 @@ func TestGetErrorNoCounter(t *testing.T) {
 	exp := fmt.Errorf("open %v: no such file or directory", path)
 
 	_, err := repo.Get()
-	if !reflect.DeepEqual(exp, err) {
+	if err == nil || err.Error() != exp.Error() {
 		t.Errorf("error expected %v, got %v", exp, err)
 	}
 }
