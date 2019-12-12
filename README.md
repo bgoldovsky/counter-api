@@ -1,6 +1,6 @@
 ## counter-api
 
-[herokuapp deployment](https://kasper-countere.herokuapp.com)
+[herokuapp deployment](https://kasper-counter.herokuapp.com)
 
 Используя только средства стандартной библиотеки, разработать HTTP-сервер. Сервер должен:
 
