@@ -2,8 +2,8 @@ package services
 
 import "github.com/bgoldovsky/counter-api/internal/models"
 
-// Counter service
+// Counter iface
 type Counter interface {
-	Increment() error
-	GetState() models.State
+	Inc() error
+	State() models.State
 }

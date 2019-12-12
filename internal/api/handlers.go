@@ -11,12 +11,16 @@ import (
 
 var counter srv.Counter
 
-type counterHandler struct {
-	http.Handler
+type CounterServer struct {
+	handler http.Handler
+}
+
+func NewServer() *CounterServer {
+	return &CounterServer{}
 }
 
 // StartServer func starts listening single endpoint of service
-func StartServer(port string, filepath string, expires int) {
+func (s *CounterServer) StartServer(port string, filepath string, expires int) {
 	log.Printf("service starting on port %s\n", port)
 
 	c, err := srv.NewCounter(filepath, expires)

@@ -13,7 +13,7 @@ func TestCountingSuccess(t *testing.T) {
 	const store = "./testfile.gob"
 	const expiresSec = 60
 
-	srv, err := NewCounter(store, expiresSec)
+	srv, err := models.NewCounter(store, expiresSec)
 	if err != nil {
 		t.Fatal("can't create service")
 	}
