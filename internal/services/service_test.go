@@ -1,111 +1,162 @@
 package services_test
 
 import (
-	"os"
+	"errors"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/bgoldovsky/counter-api/internal/dal/mock"
+	"github.com/bgoldovsky/counter-api/internal/models"
 	. "github.com/bgoldovsky/counter-api/internal/services"
+	"github.com/golang/mock/gomock"
 )
 
-func TestCountingSuccess(t *testing.T) {
-	const store = "./testfile.gob"
-	const expiresSec = 60
+func TestServiceCreateSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	repo := mock.NewMockRepo(ctrl)
 
-	srv, err := models.NewCounter(store, expiresSec)
+	repo.EXPECT().Get().Return(nil, errors.New("can't load counter"))
+
+	_, err := NewCounterService(repo, 100)
 	if err != nil {
-		t.Fatal("can't create service")
-	}
-
-	defer clear(store)
-
-	srv.Increment()
-	state := srv.GetState()
-
-	if state.Total != 1 {
-		t.Errorf("invalid state: %d\n", state.Total)
+		t.Error("creation service error:", err)
 	}
 }
 
-func TestCountingConcurrencySuccess(t *testing.T) {
+func TestServiceLoadSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	repo := mock.NewMockRepo(ctrl)
 
-	const store = "./testfile.gob"
-	const expiresSec = 60
+	counter := models.NewCounter(100, time.Now())
+	repo.EXPECT().Get().Return(counter, nil)
 
-	srv, err := NewCounter(store, expiresSec)
+	_, err := NewCounterService(repo, 100)
 	if err != nil {
-		t.Fatal("can't create service")
-	}
-
-	defer clear(store)
-
-	runConcurrency(srv)
-
-	s := srv.GetState()
-
-	if s.Total != 1000 {
-		t.Errorf("invalid state: %d\n", s.Total)
+		t.Error("creation service error:", err)
 	}
 }
 
-func TestCountingExpiredSuccess(t *testing.T) {
-	const store = "./testfile.gob"
-	const expiresSec = 3
+func TestServiceCreateErrorRepo(t *testing.T) {
+	exp := errors.New("repo not specified")
 
-	srv, err := NewCounter(store, expiresSec)
-	if err != nil {
-		t.Fatal("can't create service")
-	}
-	defer clear(store)
-
-	runConcurrency(srv)
-	time.Sleep(time.Second * expiresSec)
-
-	srv.Increment()
-
-	s := srv.GetState()
-	if s.Total != 1 {
-		t.Errorf("invalid state: %d\n", s.Total)
+	_, err := NewCounterService(nil, 100)
+	if !reflect.DeepEqual(exp, err) {
+		t.Errorf("error expected %v, got %v", exp, err)
 	}
 }
 
-func TestCountingExpiredFail(t *testing.T) {
-	const store = "./testfile.gob"
-	const expiresSec = 10
+func TestServiceCreateErrorExpires(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	repo := mock.NewMockRepo(ctrl)
 
-	srv, err := NewCounter(store, expiresSec)
-	if err != nil {
-		t.Fatal("can't create service")
-	}
-	defer clear(store)
+	exp := errors.New("expires must be positive")
+	data := []int{-1, 0}
 
-	runConcurrency(srv)
-	time.Sleep(time.Second)
-
-	s := srv.GetState()
-	if s.Total == 1 {
-		t.Errorf("invalid state: %d\n", s.Total)
+	for _, expires := range data {
+		_, err := NewCounterService(repo, expires)
+		if !reflect.DeepEqual(exp, err) {
+			t.Errorf("error expected %v, got %v", exp, err)
+		}
 	}
 }
 
-func runConcurrency(c Counter) {
+func TestIncSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	repo := mock.NewMockRepo(ctrl)
+	counter := models.NewCounter(100, time.Now())
+
+	repo.EXPECT().Get().Return(counter, nil)
+	repo.EXPECT().Save(gomock.Any()).Return(nil)
+
+	service, _ := NewCounterService(repo, 100)
+
+	err := service.Inc()
+	if err != nil {
+		t.Error("increment error:", err)
+	}
+}
+
+func TestIncError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	repo := mock.NewMockRepo(ctrl)
+	counter := models.NewCounter(100, time.Now())
+
+	exp := errors.New("save error")
+
+	repo.EXPECT().Get().Return(counter, nil)
+	repo.EXPECT().Save(gomock.Any()).Return(exp)
+
+	service, _ := NewCounterService(repo, 100)
+
+	err := service.Inc()
+	if !reflect.DeepEqual(exp, err) {
+		t.Errorf("error expected %v, got %v", exp, err)
+	}
+}
+
+func TestStateSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	repo := mock.NewMockRepo(ctrl)
+	counter := models.NewCounter(100, time.Now())
+
+	exp := &models.State{Total: 1}
+
+	repo.EXPECT().Get().Return(counter, nil)
+	repo.EXPECT().Save(gomock.Any()).Return(nil)
+
+	service, _ := NewCounterService(repo, 100)
+
+	err := service.Inc()
+	if err != nil {
+		t.Fatal("increment error:", err)
+	}
+
+	act := service.State()
+	if act.Total != exp.Total {
+		t.Errorf("expected %v, got %v", exp, err)
+	}
+}
+
+func TestRaceSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	repo := mock.NewMockRepo(ctrl)
+	counter := models.NewCounter(100, time.Now())
+
+	repo.EXPECT().Get().Return(counter, nil)
+
+	service, _ := NewCounterService(repo, 100)
+
 	var wg sync.WaitGroup
-	wg.Add(1000)
+	wg.Add(2)
 
 	for i := 0; i < 1000; i++ {
-		go func() {
-			defer wg.Done()
-			c.Increment()
-		}()
+		repo.EXPECT().Save(gomock.Any()).Return(nil)
 	}
+
+	go func() {
+		defer wg.Done()
+
+		for i := 0; i < 1000; i++ {
+			service.Inc()
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		for i := 0; i < 1000; i++ {
+			service.State()
+		}
+	}()
 
 	wg.Wait()
-}
-
-func clear(store string) {
-	var err = os.Remove(store)
-	if err != nil {
-		panic(err)
-	}
 }

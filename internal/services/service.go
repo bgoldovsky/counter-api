@@ -36,9 +36,8 @@ func NewCounterService(repo dal.Repo, expires int) (*CounterService, error) {
 	}
 
 	c := CounterService{
-		counter: *val,
-		repo:    repo,
-
+		counter:   *val,
+		repo:      repo,
 		errChan:   make(chan error, 1),
 		incChan:   make(chan struct{}),
 		stateChan: make(chan models.State),
@@ -49,22 +48,22 @@ func NewCounterService(repo dal.Repo, expires int) (*CounterService, error) {
 	return &c, nil
 }
 
-// State actualize and retrieve counter state
-func (c *CounterService) State() models.State {
-	return <-c.stateChan
-}
-
 // Inc counter state
 func (c *CounterService) Inc() error {
 	c.incChan <- struct{}{}
 	return <-c.errChan
 }
 
+// State actualize and retrieve counter state
+func (c *CounterService) State() models.State {
+	return <-c.stateChan
+}
+
 func (c *CounterService) inc() error {
 	now := time.Now().UTC()
 	c.counter.Inc(now)
-
 	err := c.repo.Save(&c.counter)
+
 	if err != nil {
 		log.Println("can't save to repo", err)
 		return err

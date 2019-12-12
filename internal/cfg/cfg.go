@@ -1,4 +1,4 @@
-package config
+package cfg
 
 import (
 	"os"
@@ -9,12 +9,12 @@ import (
 func GetExpires() int {
 
 	tmp := os.Getenv("EXPIRES")
-	exp, err := strconv.ParseInt(tmp, 10, 0)
+	expires, err := strconv.ParseInt(tmp, 10, 0)
 	if err != nil {
-		exp = 60
+		expires = 60
 	}
 
-	return int(exp)
+	return int(expires)
 }
 
 // GetPort returns HTTP port
@@ -27,12 +27,12 @@ func GetPort() string {
 	return port
 }
 
-// GetStore returns storage file path
-func GetStore() string {
-	store := os.Getenv("STORE_PATH")
-	if store == "" {
-		store = "./store.gob"
+// GetPath returns storage file path
+func GetPath() string {
+	path := os.Getenv("STORE_PATH")
+	if path == "" {
+		path = "./store.gob"
 	}
 
-	return store
+	return path
 }

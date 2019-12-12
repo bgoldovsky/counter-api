@@ -85,7 +85,10 @@ func TestStateExpired(t *testing.T) {
 	const expected = 0
 	const expires = 1
 
-	r := Counter{Expires: expires, Map: make(map[time.Time]bool)}
+	r := Counter{
+		Expires: expires,
+		Map:     make(map[time.Time]bool),
+	}
 
 	for i := 0; i < 10; i++ {
 		r.Inc(time.Now())
